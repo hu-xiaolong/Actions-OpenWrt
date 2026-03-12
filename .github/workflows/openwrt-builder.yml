@@ -15,10 +15,37 @@ name: OpenWrt Builder
 on:
   repository_dispatch:
   workflow_dispatch:
+    inputs:
+      owner:
+        description: 'ImmortalWrt 仓库的拥有者 (Owner of ImmortalWrt repo)'
+        type: string
+        required: true
+        default: 'coolsnowwolf'
+      repo:
+        description: 'ImmortalWrt 仓库的名字 (Name of ImmortalWrt repo)'
+        type: string
+        required: true
+        default: 'lede'
+      branch:
+        description: 'ImmortalWrt 仓库的分支 (Branch of ImmortalWrt repo)'
+        type: string
+        required: true
+        default: 'master'
+      multithreading:
+        description: '开启多线程编译 (Enable multithreading build)'
+        type: boolean
+        default: true
+      ssh:
+        description: '使用 ssh 连接到编译环境 (Connect to the build environment using ssh)'
+        type: boolean
+        default: false
 
 env:
-  REPO_URL: https://github.com/coolsnowwolf/lede
-  REPO_BRANCH: master
+  # REPO_URL: https://github.com/coolsnowwolf/lede
+  # REPO_BRANCH: master
+  REPO_URL: 'https://github.com/${{inputs.owner}}/${{inputs.repo}}'
+  REPO_BRANCH: ${{inputs.branch}}
+  
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: .config
   DIY_P1_SH: diy-part1.sh
@@ -79,6 +106,7 @@ jobs:
         $GITHUB_WORKSPACE/$DIY_P2_SH
 
     - name: Start SSH service
+      if: ${{inputs.ssh == true}}
       uses: mxschmitt/action-tmate@v3
       timeout-minutes: 15
 
